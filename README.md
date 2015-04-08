@@ -28,3 +28,31 @@ This is really just another way for me to learn a new language while creating a 
 | func City() string | Returns a random city from cities array |
 | func State() string | Returns a random state code from array of states |
 
+## Usage
+
+The file src/dg.go serves as a good example of how to use the package.  But here is a small block of code.
+
+```
+package main
+
+import (
+   "fmt"
+   "datagenerator"
+)
+
+func main() {
+
+  fmt.Println(g.LastName() + "," + g.FirstName() )
+  fmt.Println(g.Numeric(5))
+  fmt.Println(g.Alpha(11))
+  fmt.Println(g.StreetName())
+  fmt.Println(g.StreetType())
+  fmt.Println(g.City())
+  fmt.Println(g.State())
+
+}
+```
+
+
+
+
