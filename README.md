@@ -7,6 +7,7 @@ This is really just another way for me to learn a new language while creating a 
 
 ## Files
 
+| --- | --- |
 | README.md | This file |
 | src/dg/dg.go | Run at the command line to generate text data|
 | src/datagenerator/datagenerator.go | Contains datagenerator functions|
