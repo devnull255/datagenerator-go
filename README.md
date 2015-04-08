@@ -37,7 +37,7 @@ package main
 
 import (
    "fmt"
-   "datagenerator"
+   g "datagenerator"
 )
 
 func main() {
