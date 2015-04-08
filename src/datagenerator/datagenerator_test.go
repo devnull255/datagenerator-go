@@ -9,3 +9,11 @@ func TestFirstName(t *testing.T) {
    }
 }
 
+func TestLastName(t *testing.T) {
+  last_name := LastName()
+  if len(last_name) == 0 {
+     t.Error("LastName should have string!")
+  }
+}
+
+

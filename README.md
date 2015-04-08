@@ -15,3 +15,16 @@ This is really just another way for me to learn a new language while creating a 
 | src/datagenerator/datagenerator_test.go |Testing package |
 
 ## datagenerator functions
+
+| Function | Description |
+| --- | --- |
+| func LowerAlpha() string | Returns lowercase alphabet |
+| func FirstName() string | Returns a random firstname string from firstNames array |
+| func LastName() string | Returns a random lastname string from lastNames array |
+| func Numeric(num int) string | Returns a string of numbers with num length |
+| func Alpha(num int) string | Returns a string of lowercase numbers with num length |
+| func StreetName() string | Returns a random streetname from streetNames array |
+| func StreetType() string | Returns a random streetType (like ST., AVE., BLVD ) |
+| func City() string | Returns a random city from cities array |
+| func State() string | Returns a random state code from array of states |
+
