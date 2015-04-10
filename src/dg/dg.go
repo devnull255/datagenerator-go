@@ -8,6 +8,7 @@ import (
        "bytes"
        "strings"
        s "strconv"
+       "os"
 )
 
 var buf bytes.Buffer
@@ -66,10 +67,17 @@ func main() {
   var test_run = flag.Bool("test_run",false,"Run simple test of all datagenerator functions")
   var count int
   var use_rec_id = false
+  var test_arg = false
 
   flag.IntVar(&count,"count",1,"Number of records to generate.")
   flag.BoolVar(&use_rec_id,"recid",false,"Include a record ID for first field.")
+  flag.BoolVar(&test_arg,"with-test-arg",false,"Passed a testarg.")
   flag.Parse()
+
+  if test_arg {
+      fmt.Println("You passed the test_arg")
+      os.Exit(0)
+  }
 
   if *test_run == true {
      test()
