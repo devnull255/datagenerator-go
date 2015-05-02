@@ -5,6 +5,9 @@ package datagenerator
 //
 
 import (
+     r "crypto/rand"
+     "crypto/rsa"
+     "crypto/md5"
      "math/rand"
      "time"
      "fmt"
@@ -85,6 +88,26 @@ func StreetType() string {
   //returns a random streettype from streetTypes array
   return streetTypes[rand.Intn(len(streetTypes))]
 }
+
+func EncryptedText() string {
+  //returns a string of encrypted text for randomly generated alpha 20
+  privkey,err := rsa.GenerateKey(r.Reader,512)
+  if err != nil {
+     panic(err)
+  }
+  md5hash := md5.New()
+  label := []byte("datagenerator")
+  var publickey *rsa.PublicKey
+  str := []byte(Alpha(20))
+  publickey = &privkey.PublicKey
+
+  encrypted_data,err := rsa.EncryptOAEP(md5hash,r.Reader,publickey,str,label)
+  if err != nil {
+     panic(err)
+  }
+  return string(encrypted_data)
+}
+
 
 func City() string {
    //returns a random city from cities array
