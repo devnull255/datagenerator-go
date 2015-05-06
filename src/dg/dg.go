@@ -17,6 +17,9 @@
  *     streettype - returns a list of streettype from the list of streettypes
  *     encryptedtext -returns a randomly encrypted string
  *
+ *     any fieldspec included in the list that is not recognized is treated as a literal and is returned
+ *     as a field with that value.
+ *
  *********************************************************************************************************
  * Maintenance Log
  * 
@@ -38,6 +41,7 @@ import (
        "strings"
        s "strconv"
        "os"
+       "time"
 )
 
 var buf bytes.Buffer
@@ -56,13 +60,41 @@ func test() {
   fmt.Println(g.State())
 }
 
-func generate(fieldspecs []string) string {
+func current_dt() string {
+   // return current date in YYYY-MM-DD format
+   const layout = "2006-01-02"
+   return fmt.Sprintf(time.Now().Format(layout))
+}
+
+func current_ts() string {
+  // returns a current timestamp in YYY-mm-dd HH:MM:SS
+  const layout = "2006-01-02 15:04:05"
+  return fmt.Sprintf(time.Now().Format(layout))
+}
+
+func generate(fieldspecs []string,keyval_format bool,titles []string) string {
   //fmt.Printf("%q\n",fieldspecs)
   result := ""
   rec := make([]string,len(fieldspecs))
 
+  in_fieldspec_names := map[string]bool{
+       "numeric": true,
+       "alpha": true,
+       "lastname": true,
+       "firstname": true,
+       "state": true,
+       "streetname": true,
+       "city": true,
+       "streettype": true,
+       "encryptedtext": true,
+       "sha1text": true,
+       "current_dt": true,
+       "current_ts": true,
+  }
+    
   for i,spec := range fieldspecs {
      fieldspec := strings.Split(spec,":")
+     var field_title string
      switch fieldspec[0] {
        case "numeric":
          num, _:= s.Atoi(fieldspec[1]) 
@@ -84,8 +116,22 @@ func generate(fieldspecs []string) string {
          rec[i] = g.StreetType()
        case "encryptedtext":
          rec[i] = g.EncryptedText()
+       case "sha1text":
+         rec[i] = g.SHA1HashText()
+       case "today":
+         rec[i] = current_dt()
+       case "now":
+         rec[i] = current_ts()
        default:
          rec[i] = fieldspec[0]
+       }
+       if in_fieldspec_names[fieldspec[0]] { 
+         field_title = fieldspec[0]
+       } else {
+         field_title = fmt.Sprintf("Field%d",i + 1)
+       }
+       if keyval_format {
+          rec[i] = fmt.Sprintf("%s=%s",field_title,rec[i])
        }
    }
    result = strings.Join(rec,"|")
@@ -99,11 +145,16 @@ func main() {
   var count int
   var use_rec_id = false
   var test_arg = false
+  var use_fieldtitle = false
   var outfile = ""
+  var title_list = ""
+
   flag.StringVar(&outfile,"outfile","","Output file to write generated records to")
   flag.IntVar(&count,"count",1,"Number of records to generate.")
   flag.BoolVar(&use_rec_id,"recid",false,"Include a record ID for first field.")
   flag.BoolVar(&test_arg,"with-test-arg",false,"Passed a testarg.")
+  flag.BoolVar(&use_fieldtitle,"with-field-title",false,"Each field is titled in key=value format")
+  flag.StringVar(&title_list,"title_list","","Comma-separated list of titles for each field")
   flag.Usage = func() {
     fmt.Fprintf(os.Stderr,`Usage:  dg.go -fieldspecs <comma-separated fieldspec list> [-count n] [-recid] [-outfile filename]
        
@@ -121,6 +172,8 @@ func main() {
       city - returns a random city from the list of cities in datagenerator
       streettype - returns a list of streettype from the list of streettypes
       encryptedtext -returns a randomly encrypted string
+      current_ts - returns a current timestamp string in the format YYYY-mm-dd HH:MM:SS
+      current_dt - returns a current date string in the format YYYY-mm-dd
 
 `)
      flag.PrintDefaults()
@@ -135,6 +188,8 @@ func main() {
   if *test_run == true {
      test()
   } else {
+     
+     titles := strings.Split(title_list,",")
      if *fieldtype_str != "none" {
         fieldspecs := strings.Split(*fieldtype_str,",")
         rec_id_str := ""
@@ -142,7 +197,7 @@ func main() {
           if use_rec_id {
              rec_id_str = fmt.Sprintf("%d|",i)
           }
-          rec := fmt.Sprintf("%s%s",rec_id_str,generate(fieldspecs))
+          rec := fmt.Sprintf("%s%s",rec_id_str,generate(fieldspecs,use_fieldtitle,titles))
           fmt.Println(rec)
         }
      }

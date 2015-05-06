@@ -8,6 +8,7 @@ import (
      r "crypto/rand"
      "crypto/rsa"
      "crypto/md5"
+     "crypto/sha1"
      "math/rand"
      "time"
      "fmt"
@@ -108,6 +109,12 @@ func EncryptedText() string {
   return string(encrypted_data)
 }
 
+func SHA1HashText() string {
+  //returns an SHA1 hash string for randomly generated alpha 20
+  data := []byte(Alpha(20))
+  hash_text := fmt.Sprintf("%x",sha1.Sum(data))
+  return hash_text 
+}
 
 func City() string {
    //returns a random city from cities array
