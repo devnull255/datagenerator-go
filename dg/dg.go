@@ -34,7 +34,7 @@ package main
 
 import (
        "fmt"
-       g "datagenerator"
+       g "github.com/devnull255/datagenerator-go/datagenerator"
        "flag"
        "log"
        "bytes"
