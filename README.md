@@ -53,6 +53,9 @@ func main() {
 }
 ```
 
-
+## TODO
+- Add proper documentation for all source files
+- Refactor code based on golint suggestions
+- Add testing/quick tests
 
 

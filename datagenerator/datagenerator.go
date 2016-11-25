@@ -1,7 +1,7 @@
 package datagenerator
-//datagenerator package
-//This package contains functions for generating datasets for testing and 
-//development.  This is the go implementation
+// datagenerator package
+// This package contains functions for generating datasets for testing and
+// development.  This is the go implementation
 //
 
 import (
