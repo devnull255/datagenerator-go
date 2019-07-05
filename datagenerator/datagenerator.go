@@ -10,6 +10,8 @@ import (
      "crypto/md5"
      "crypto/sha1"
      "math/rand"
+     s "strings"
+     c "strconv"
      "time"
      "fmt"
 )
@@ -30,6 +32,22 @@ var states = [50]string {"AL","AS","AR","AK","CA","CO","CN","DE","FL","GA","HI",
          "IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NJ","NH",
          "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VM",
          "VA","WA","WV","WI","WY"}
+
+var in_fieldspec_names = map[string]bool{
+       "numeric": true,
+       "alpha": true,
+       "lastname": true,
+       "firstname": true,
+       "state": true,
+       "streetname": true,
+       "city": true,
+       "streettype": true,
+       "encryptedtext": true,
+       "sha1text": true,
+       "current_dt": true,
+       "current_ts": true,
+}
+
 
 func init() {
    // perform module initialization
@@ -126,3 +144,90 @@ func State() string {
   return states[rand.Intn(len(states))]
 }
 
+func current_dt() string {
+   // return current date in YYYY-MM-DD format
+   const layout = "2006-01-02"
+   return fmt.Sprintf(time.Now().Format(layout))
+}
+
+func current_ts() string {
+  // returns a current timestamp in YYY-mm-dd HH:MM:SS
+  const layout = "2006-01-02 15:04:05"
+  return fmt.Sprintf(time.Now().Format(layout))
+}
+
+func getData(fieldspec []string) string {
+     result := ""
+     switch fieldspec[0] {
+       case "numeric":
+         num, _:= c.Atoi(fieldspec[1])
+         result = Numeric(num)
+       case "alpha":
+         num, _:= c.Atoi(fieldspec[1])
+         result = Alpha(num)
+       case "lastname":
+         result = LastName()
+       case "firstname":
+         result = FirstName()
+       case "state":
+         result = State()
+       case "streetname":
+         result = StreetName()
+       case "city":
+         result = City()
+       case "streettype":
+         result = StreetType()
+       case "encryptedtext":
+         result = EncryptedText()
+       case "sha1text":
+         result = SHA1HashText()
+       case "today":
+         result = current_dt()
+       case "now":
+         result = current_ts()
+       default:
+         result = fieldspec[0]
+      }
+      return result
+}
+
+func Map(key_value_pairs string) string {
+  //returns string representation of a map of a keys and values based on comma-separated list of key=value pairs
+  //if value is a recognized generator-name, a randomized value for that
+  // generator will be output.
+  // Example:  home=address,first_name=first_name,last_name=last_name will generate output like
+  // {'home': {'street': '123 Baker Street', 'city': 'Grand Forks', 'state': 'SD'},'first_name': 'Bill', 'last_name': 'Dobbs'}
+  sMap := ""
+  // kv_tokens := s.SplitN(key_value_pairs, ":",2)
+  kv_list := s.Split(key_value_pairs, ",")
+  m := make(map[string]string)
+  for _,t := range(kv_list) {
+     pair := s.Split(t, "=")
+     fieldspec := s.Split(pair[1], ":")
+     if in_fieldspec_names[fieldspec[0]] {
+         m[pair[0]] = getData(fieldspec)
+     } else {
+         m[pair[0]] = pair[1]
+     }
+  } 
+  sMap = fmt.Sprintf("%#v",m)
+  start_brace := s.Index(sMap, "{")
+  if start_brace >= 0 {
+      sMap = sMap[start_brace:]
+  }   
+  sMap = s.ReplaceAll(sMap, "\"","'")
+  return sMap
+}
+
+func List(gen_type string, count int) string {
+   // returns a string representation of a list of gen_type values
+   sList := ""
+   return sList 
+}
+
+func Set(gen_type string, count int) string {
+   // returns a string representation of a set of unique values of
+   // gen_type
+   sSet := ""
+   return sSet
+}

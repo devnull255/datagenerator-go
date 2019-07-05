@@ -80,3 +80,14 @@ func TestState(t *testing.T)  {
   NonZeroLenCheck("State",State(),t)
 }
 
+func TestMap(t *testing.T) {
+   simple_input := "first_name=firstname,last_name=lastname"
+   output := Map(simple_input)
+   with_length_fields := "hotel_id=alpha:5,hotel_name=Marriott,poi_name=Mayo Clinic"
+   fmt.Printf("Map Test: %s\n", output) 
+   output = Map(with_length_fields)
+   fmt.Printf("Map Test: %s\n", output) 
+   with_address := "hotel_id=alpha:5,hotel_name=Bates Motel,address=address"
+   output = Map(with_address)
+   fmt.Printf("Map Test: %s\n", output)
+}
