@@ -185,6 +185,8 @@ func getData(fieldspec []string) string {
          result = current_dt()
        case "now":
          result = current_ts()
+       case "map":
+         result = Map(fieldspec[1])
        default:
          result = fieldspec[0]
       }
@@ -221,8 +223,19 @@ func Map(key_value_pairs string) string {
 
 func List(gen_type string, count int) string {
    // returns a string representation of a list of gen_type values
-   sList := ""
-   return sList 
+   data := ""
+   aList := make([]string,0,count)
+   fieldspec := s.Split(gen_type, ":")
+   for i := 0; i < count; i++ {
+       if in_fieldspec_names[fieldspec[0]] {
+           data = getData(fieldspec)
+       } else {
+           data = gen_type
+       }
+       aList = append(aList, data)
+   }
+       
+   return fmt.Sprintf("%#v", aList) 
 }
 
 func Set(gen_type string, count int) string {

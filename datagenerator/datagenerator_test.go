@@ -7,12 +7,29 @@ import (
    "strings"
 )
 
+func contains(s []string, value string) bool {
+    for _, elem := range s {
+        if value == elem {
+            return true
+        }
+    }
+    return false
+}
+
 func NonZeroLenCheck(check_name string,s string,t *testing.T) {
   if len(s) == 0 {
     msg := fmt.Sprintf("%s should not be zero length!",check_name)
     t.Error(msg)
   }
 } 
+
+func validStringValuesCheck(check_name string, inputValues []string, validValues []string, t *testing.T) {
+   for _, elem := range inputValues {
+       if ! contains(validValues, elem) {
+           t.Errorf("unexpected value %s in inputvalues for %s", elem, check_name)
+       }
+   }
+}
 
 func TestFirstName(t *testing.T) {
    first_name := FirstName()
@@ -91,3 +108,8 @@ func TestMap(t *testing.T) {
    output = Map(with_address)
    fmt.Printf("Map Test: %s\n", output)
 }
+
+func TestList(t *testing.T) {
+    fname_list := List("firstname", 5)
+    fmt.Println("List Test: ",fname_list)
+}    
