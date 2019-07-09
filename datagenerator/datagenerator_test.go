@@ -113,3 +113,15 @@ func TestList(t *testing.T) {
     fname_list := List("firstname", 5)
     fmt.Println("List Test: ",fname_list)
 }    
+
+func TestGetAddress(t *testing.T) {
+    address := GetAddress()
+    fmt.Println("GetAddress Test: ",address)
+}
+
+func TestSet(t *testing.T) {
+   s1 := Set("firstname", 5)
+   s2 := Set("section", 5)
+   fmt.Println("Set Test: ", s1)
+   fmt.Println("Set Test: ", s2)
+}

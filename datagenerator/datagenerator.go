@@ -9,6 +9,7 @@ import (
      "crypto/rsa"
      "crypto/md5"
      "crypto/sha1"
+     "encoding/json"
      "math/rand"
      s "strings"
      c "strconv"
@@ -20,6 +21,14 @@ import (
  Module Variables/Constants
  I should probably make those constants
  ********************************************************************************/
+
+type Address struct {
+    Street string `json:"street"`
+    City string `json:"city"`
+    State string `json:"state"`
+    PostalOrZipCode string `json:"postal_or_zipcode"`
+}
+
 var firstNames = [12]string  {"Michael","Paul","Amy","Cheryl","Randy","Becky",
       "Vicky","David","Heidi","Richard","Joseph","Patricia"}
 
@@ -36,6 +45,7 @@ var states = [50]string {"AL","AS","AR","AK","CA","CO","CN","DE","FL","GA","HI",
 var in_fieldspec_names = map[string]bool{
        "numeric": true,
        "alpha": true,
+       "address": true,
        "lastname": true,
        "firstname": true,
        "state": true,
@@ -162,6 +172,8 @@ func getData(fieldspec []string) string {
        case "numeric":
          num, _:= c.Atoi(fieldspec[1])
          result = Numeric(num)
+       case "address":
+         result = GetAddress()
        case "alpha":
          num, _:= c.Atoi(fieldspec[1])
          result = Alpha(num)
@@ -199,7 +211,6 @@ func Map(key_value_pairs string) string {
   // generator will be output.
   // Example:  home=address,first_name=first_name,last_name=last_name will generate output like
   // {'home': {'street': '123 Baker Street', 'city': 'Grand Forks', 'state': 'SD'},'first_name': 'Bill', 'last_name': 'Dobbs'}
-  sMap := ""
   // kv_tokens := s.SplitN(key_value_pairs, ":",2)
   kv_list := s.Split(key_value_pairs, ",")
   m := make(map[string]string)
@@ -212,14 +223,21 @@ func Map(key_value_pairs string) string {
          m[pair[0]] = pair[1]
      }
   } 
-  sMap = fmt.Sprintf("%#v",m)
-  start_brace := s.Index(sMap, "{")
-  if start_brace >= 0 {
-      sMap = sMap[start_brace:]
-  }   
-  sMap = s.ReplaceAll(sMap, "\"","'")
-  return sMap
+  j, _ := json.Marshal(m)
+  return string(j)
 }
+
+func GetAddress() string {
+   // Get Address returns an Address string in JSON format
+   address := &Address { fmt.Sprintf("%s %s %s",Numeric(5), StreetName(), StreetType()),
+       City(),
+       State(),
+       Numeric(5),
+   }
+   j, _ := json.Marshal(address)
+   return string(j)
+}
+
 
 func List(gen_type string, count int) string {
    // returns a string representation of a list of gen_type values
@@ -234,13 +252,30 @@ func List(gen_type string, count int) string {
        }
        aList = append(aList, data)
    }
-       
-   return fmt.Sprintf("%#v", aList) 
+   j, _ := json.Marshal(aList)    
+   return string(j)
 }
 
 func Set(gen_type string, count int) string {
    // returns a string representation of a set of unique values of
    // gen_type
-   sSet := ""
-   return sSet
+   m := make(map[string]bool)
+   l := make([]string,0,count)
+   data := ""
+   fieldspec := s.Split(gen_type, ":")
+   i := 0
+   for i < count {
+       if in_fieldspec_names[fieldspec[0]] {
+          data = getData(fieldspec)
+      } else {
+          data = fmt.Sprintf("%s_%s",fieldspec[0], Alpha(1))
+      }
+      if m[data] == false {
+          m[data] = true
+          i++
+          l = append(l, data)
+      }
+    }
+    setString := s.ReplaceAll(fmt.Sprintf("%#v",l),"[]string","")
+    return setString
 }
