@@ -29,8 +29,8 @@ type Address struct {
     PostalOrZipCode string `json:"postal_or_zipcode"`
 }
 
-var firstNames = [12]string  {"Michael","Paul","Amy","Cheryl","Randy","Becky",
-      "Vicky","David","Heidi","Richard","Joseph","Patricia"}
+var firstNames = []string  {"Michael","Paul","Amy","Cheryl","Randy","Becky",
+      "Vicky","David","Heidi","Richard","Joseph","Patricia", "Foster", "Madison", "Keegan", "Yvonne", "Elizabeth"}
 
 var lastNames = [28]string  {"Anderson","Amherst","Baines","Carlson","De Jong","Everson","Furman","Garfield","Haynes","Isaacs", "Jackson","Klopper","Lamb","Martin","Nieman","O'Doole","Prince","Smith","Quayle","Rhodes","Stark",
                         "Thomas","Uhura","Vulcan","Williams","Xavier","Yeoman","Zane"}
@@ -279,3 +279,35 @@ func Set(gen_type string, count int) string {
     setString := s.ReplaceAll(fmt.Sprintf("%#v",l),"[]string","")
     return setString
 }
+
+func States() []string {
+   // States returns the list of states
+   return states[:]
+}
+
+func FirstNames() []string {
+    // FirstNames returns the slice of firstnames
+    return firstNames[:]
+}
+
+func LastNames() []string {
+    // LastNames returns the slice of lastnames
+    return lastNames[:]
+}
+
+func Cities() []string {
+    // Cities returns the slice of cities
+    return cities[:]
+}
+
+func StreetNames() []string {
+    // StreetNames returns a slice of streetnames
+    return streetNames[:]
+}
+
+func StreetTypes() []string {
+    // StreetTypes returns a slice of streettypes
+    return streetTypes[:]
+}
+
+
