@@ -9,7 +9,10 @@ import (
      "crypto/rsa"
      "crypto/md5"
      "crypto/sha1"
+     "encoding/json"
      "math/rand"
+     s "strings"
+     c "strconv"
      "time"
      "fmt"
 )
@@ -18,8 +21,16 @@ import (
  Module Variables/Constants
  I should probably make those constants
  ********************************************************************************/
-var firstNames = [12]string  {"Michael","Paul","Amy","Cheryl","Randy","Becky",
-      "Vicky","David","Heidi","Richard","Joseph","Patricia"}
+
+type Address struct {
+    Street string `json:"street"`
+    City string `json:"city"`
+    State string `json:"state"`
+    PostalOrZipCode string `json:"postal_or_zipcode"`
+}
+
+var firstNames = []string  {"Michael","Paul","Amy","Cheryl","Randy","Becky",
+      "Vicky","David","Heidi","Richard","Joseph","Patricia", "Foster", "Madison", "Keegan", "Yvonne", "Elizabeth"}
 
 var lastNames = [28]string  {"Anderson","Amherst","Baines","Carlson","De Jong","Everson","Furman","Garfield","Haynes","Isaacs", "Jackson","Klopper","Lamb","Martin","Nieman","O'Doole","Prince","Smith","Quayle","Rhodes","Stark",
                         "Thomas","Uhura","Vulcan","Williams","Xavier","Yeoman","Zane"}
@@ -30,6 +41,23 @@ var states = [50]string {"AL","AS","AR","AK","CA","CO","CN","DE","FL","GA","HI",
          "IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NJ","NH",
          "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VM",
          "VA","WA","WV","WI","WY"}
+
+var in_fieldspec_names = map[string]bool{
+       "numeric": true,
+       "alpha": true,
+       "address": true,
+       "lastname": true,
+       "firstname": true,
+       "state": true,
+       "streetname": true,
+       "city": true,
+       "streettype": true,
+       "encryptedtext": true,
+       "sha1text": true,
+       "current_dt": true,
+       "current_ts": true,
+}
+
 
 func init() {
    // perform module initialization
@@ -125,4 +153,161 @@ func State() string {
   //returns a random state from states arrau
   return states[rand.Intn(len(states))]
 }
+
+func current_dt() string {
+   // return current date in YYYY-MM-DD format
+   const layout = "2006-01-02"
+   return fmt.Sprintf(time.Now().Format(layout))
+}
+
+func current_ts() string {
+  // returns a current timestamp in YYY-mm-dd HH:MM:SS
+  const layout = "2006-01-02 15:04:05"
+  return fmt.Sprintf(time.Now().Format(layout))
+}
+
+func getData(fieldspec []string) string {
+     result := ""
+     switch fieldspec[0] {
+       case "numeric":
+         num, _:= c.Atoi(fieldspec[1])
+         result = Numeric(num)
+       case "address":
+         result = GetAddress()
+       case "alpha":
+         num, _:= c.Atoi(fieldspec[1])
+         result = Alpha(num)
+       case "lastname":
+         result = LastName()
+       case "firstname":
+         result = FirstName()
+       case "state":
+         result = State()
+       case "streetname":
+         result = StreetName()
+       case "city":
+         result = City()
+       case "streettype":
+         result = StreetType()
+       case "encryptedtext":
+         result = EncryptedText()
+       case "sha1text":
+         result = SHA1HashText()
+       case "today":
+         result = current_dt()
+       case "now":
+         result = current_ts()
+       case "map":
+         result = Map(fieldspec[1])
+       default:
+         result = fieldspec[0]
+      }
+      return result
+}
+
+func Map(key_value_pairs string) string {
+  //returns string representation of a map of a keys and values based on comma-separated list of key=value pairs
+  //if value is a recognized generator-name, a randomized value for that
+  // generator will be output.
+  // Example:  home=address,first_name=first_name,last_name=last_name will generate output like
+  // {'home': {'street': '123 Baker Street', 'city': 'Grand Forks', 'state': 'SD'},'first_name': 'Bill', 'last_name': 'Dobbs'}
+  // kv_tokens := s.SplitN(key_value_pairs, ":",2)
+  kv_list := s.Split(key_value_pairs, ",")
+  m := make(map[string]string)
+  for _,t := range(kv_list) {
+     pair := s.Split(t, "=")
+     fieldspec := s.Split(pair[1], ":")
+     if in_fieldspec_names[fieldspec[0]] {
+         m[pair[0]] = getData(fieldspec)
+     } else {
+         m[pair[0]] = pair[1]
+     }
+  } 
+  j, _ := json.Marshal(m)
+  return string(j)
+}
+
+func GetAddress() string {
+   // Get Address returns an Address string in JSON format
+   address := &Address { fmt.Sprintf("%s %s %s",Numeric(5), StreetName(), StreetType()),
+       City(),
+       State(),
+       Numeric(5),
+   }
+   j, _ := json.Marshal(address)
+   return string(j)
+}
+
+
+func List(gen_type string, count int) string {
+   // returns a string representation of a list of gen_type values
+   data := ""
+   aList := make([]string,0,count)
+   fieldspec := s.Split(gen_type, ":")
+   for i := 0; i < count; i++ {
+       if in_fieldspec_names[fieldspec[0]] {
+           data = getData(fieldspec)
+       } else {
+           data = gen_type
+       }
+       aList = append(aList, data)
+   }
+   j, _ := json.Marshal(aList)    
+   return string(j)
+}
+
+func Set(gen_type string, count int) string {
+   // returns a string representation of a set of unique values of
+   // gen_type
+   m := make(map[string]bool)
+   l := make([]string,0,count)
+   data := ""
+   fieldspec := s.Split(gen_type, ":")
+   i := 0
+   for i < count {
+       if in_fieldspec_names[fieldspec[0]] {
+          data = getData(fieldspec)
+      } else {
+          data = fmt.Sprintf("%s_%s",fieldspec[0], Alpha(1))
+      }
+      if m[data] == false {
+          m[data] = true
+          i++
+          l = append(l, data)
+      }
+    }
+    setString := s.ReplaceAll(fmt.Sprintf("%#v",l),"[]string","")
+    return setString
+}
+
+func States() []string {
+   // States returns the list of states
+   return states[:]
+}
+
+func FirstNames() []string {
+    // FirstNames returns the slice of firstnames
+    return firstNames[:]
+}
+
+func LastNames() []string {
+    // LastNames returns the slice of lastnames
+    return lastNames[:]
+}
+
+func Cities() []string {
+    // Cities returns the slice of cities
+    return cities[:]
+}
+
+func StreetNames() []string {
+    // StreetNames returns a slice of streetnames
+    return streetNames[:]
+}
+
+func StreetTypes() []string {
+    // StreetTypes returns a slice of streettypes
+    return streetTypes[:]
+}
+
 

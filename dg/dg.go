@@ -33,6 +33,7 @@
 package main
 
 import (
+       "encoding/json"
        "fmt"
        g "github.com/devnull255/datagenerator-go/datagenerator"
        "flag"
@@ -138,10 +139,28 @@ func generate(fieldspecs []string,keyval_format bool,titles []string) string {
    return result
 }
 
+func format_output(data_to_export []string, python_fmt, json_fmt *bool) string {
+
+     var output string
+     if *python_fmt {
+         output = fmt.Sprintf("['%s']\n", strings.Join(data_to_export, "','"))
+     } else if *json_fmt {
+         jout, _  := json.MarshalIndent(data_to_export, "", "    ")
+         output = string(jout)
+     } else { 
+         output = fmt.Sprintf("%v\n", data_to_export)
+     }
+     return output
+
+}
+
 func main() {
   //
   var fieldtype_str = flag.String("fieldspecs","none","comma-separated fieldspec list")
   var test_run = flag.Bool("test_run",false,"Run simple test of all datagenerator functions")
+  var export_states = flag.Bool("export_states", false, "Export states used by datagenerator")
+  var python_fmt = flag.Bool("python_fmt", false, "Output in python formatted lists or dicts")
+  var json_fmt = flag.Bool("json_fmt", false, "Output in JSON fmt")
   var count int
   var use_rec_id = false
   var test_arg = false
@@ -183,6 +202,16 @@ func main() {
   if test_arg {
       fmt.Println("You passed the test_arg")
       os.Exit(0)
+  }
+
+  if *export_states {
+
+     states := g.States()
+     output := format_output(states, python_fmt, json_fmt)
+
+     fmt.Print(output)
+
+     os.Exit(0)
   }
 
   if *test_run == true {
